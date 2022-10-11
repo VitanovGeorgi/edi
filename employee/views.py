@@ -1,7 +1,3 @@
-from operator import setitem
-from os import stat
-from tkinter.messagebox import NO
-from urllib import response
 from django.shortcuts import get_object_or_404
 from rest_framework import status, serializers
 from rest_framework.response import Response
