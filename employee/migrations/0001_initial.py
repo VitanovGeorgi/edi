@@ -8,40 +8,86 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Employee',
+            name="Employee",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=20)),
-                ('hourly_rate', models.FloatField()),
-                ('employee_id', models.CharField(max_length=10, unique=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=20)),
+                ("hourly_rate", models.FloatField()),
+                ("employee_id", models.CharField(max_length=10, unique=True)),
             ],
             options={
-                'ordering': ['employee_id'],
+                "ordering": ["employee_id"],
             },
         ),
         migrations.CreateModel(
-            name='Team',
+            name="Team",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=20, unique=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=20, unique=True)),
             ],
         ),
         migrations.CreateModel(
-            name='PartialTeamEmployeeRelation',
+            name="PartialTeamEmployeeRelation",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('employee_type', models.CharField(choices=[('EMPLOYEE', 'Employee'), ('LEADER', 'Leader')], default='EMPLOYEE', max_length=20)),
-                ('work_arr', models.PositiveIntegerField(default=40, verbose_name='Work Arrangements [hours/week]')),
-                ('employee', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='employee.employee')),
-                ('team', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='employee.team')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "employee_type",
+                    models.CharField(
+                        choices=[("EMPLOYEE", "Employee"), ("LEADER", "Leader")],
+                        default="EMPLOYEE",
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "work_arr",
+                    models.PositiveIntegerField(
+                        default=40, verbose_name="Work Arrangements [hours/week]"
+                    ),
+                ),
+                (
+                    "employee",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="employee.employee",
+                    ),
+                ),
+                (
+                    "team",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="employee.team"
+                    ),
+                ),
             ],
             options={
-                'unique_together': {('employee', 'team')},
+                "unique_together": {("employee", "team")},
             },
         ),
     ]

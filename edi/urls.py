@@ -21,16 +21,18 @@ from rest_framework import permissions
 
 schema_view = swagger_get_schema_view(
     openapi.Info(
-        title='Edi API',
-        default_version='1.0.0',
-        description='API documentation for the project',
+        title="Edi API",
+        default_version="1.0.0",
+        description="API documentation for the project",
     ),
     public=True,
     permission_classes=(permissions.AllowAny,),
 )
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('api/', include('employee.urls')),
-    path('info/', schema_view.with_ui('swagger', cache_timeout=0), name='swagger-schema'),
+    path("admin/", admin.site.urls),
+    path("api/", include("employee.urls")),
+    path(
+        "info/", schema_view.with_ui("swagger", cache_timeout=0), name="swagger-schema"
+    ),
 ]
