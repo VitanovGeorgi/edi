@@ -32,5 +32,5 @@ schema_view = swagger_get_schema_view(
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('employee.urls')),
-    path('info/', schema_view.with_ui('swagger', chache_timeout=0), name='swagger-schema'),
+    path('info/', schema_view.with_ui('swagger', cache_timeout=0), name='swagger-schema'),
 ]

@@ -20,7 +20,7 @@ def employee_api(request):
             If there's a query param employee_id [str] corresponding to Employee.employee_id
             then return only that employee, o.w. return all employees
         '''
-        query_id = request.query_param.get('employee_id', None)
+        query_id = request.query_params.get('employee_id', None)
         if query_id is not None:
             employee = get_object_or_404(qs.filter(employee_id=query_id))
             serializer = EmployeeSerializer(instance=employee)
@@ -188,7 +188,7 @@ def team_employee_api(request):
         if not isinstance(request.data['team'], str):
             raise serializers.ValidationError('Please enter a valid team name, a string.')
 
-        team = Team.objects.filter(name=request.data['name']).first()
+        team = Team.objects.filter(name=request.data['team']).first()
         if team is None:
             raise serializers.ValidationError('No team with this name.')
 
@@ -201,7 +201,7 @@ def team_employee_api(request):
         # validating that the input hours aren't going to take the employee over the maximum allowed
         employee_relations = TERelation.objects.filter(employee=employee.id)
         total_hours = 0
-        hours_prior_to_update = serializer.data['work_arr']
+        hours_prior_to_update = serializer.validated_data['work_arr']
         for relation in employee_relations:
             total_hours += relation.work_arr
 
@@ -270,7 +270,7 @@ def team_employee_api(request):
 
         # employee_update and team_update have to be last, since they're used as identifiers  for the relation
         # if they're higher, a user can change the employee_id and previously mentioned params, and might cause an error
-        if 'employee_update' is request.data:
+        if 'employee_update' in request.data:
             if not isinstance(request.data['employee_update'], str):
                 raise serializers.ValidationError('Please enter a valid employee id, a string', status=status.HTTP_404_NOT_FOUND)
             # that the employee we're changing it with exists
