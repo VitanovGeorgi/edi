@@ -7,6 +7,6 @@ urlpatterns = [
     path('employee/<str:pk>', employee_api_pk, name='employee-api-pk'),
     path('team/', team_api, name='team-api'),
     path('team/<str:pk>', team_api_pk, name='team-api-pk'),
-    path('team-employee-relation', team_employee_api, name='team-employee-api'),
+    path('team-employee-relation/', team_employee_api, name='team-employee-api'),
     path('financials/', financials_api, name='financials-api'),
 ]
