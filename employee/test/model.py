@@ -45,7 +45,8 @@ class PartialModelTest(TestCase):
 
     def test_model_str(self):
         self.assertEqual(
-            f"{str(self.team_employee_relation.employee)} {str(self.team_employee_relation.team)} {self.team_employee_relation.work_arr}",
+            f"{str(self.team_employee_relation.employee)} {str(self.team_employee_relation.team)}"
+            f" {self.team_employee_relation.work_arr}",
             "George A123 Test_team 20.0",
         )
 
