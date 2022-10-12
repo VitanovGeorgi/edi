@@ -241,7 +241,8 @@ class PartialTeamEmployeeApiTest(APITestCase):
         employee = Employee.objects.create(
             name="Employee", hourly_rate=14, employee_id="C123"
         )
-        # Employee.save() # so we have them actually, in the post we'll just send a json of the relation, not the employee/team itself
+        # Employee.save() # so we have them actually, in the post we'll just send a json of the relation,
+        # not the employee/team itself
         team = Team.objects.create(name="Team")
         # Team.save()
         e3t3 = {
@@ -428,7 +429,8 @@ class FinancialsApiTest(APITestCase):
         cls.url = reverse("financials-api")
 
     def test_get_api(self):
-        # for the values, I ran the test and saw the results, or just calculate them by hand, keeping in mind they're floats
+        # for the values, I ran the test and saw the results, or just calculate them by hand,
+        # keeping in mind they're floats
         response = self.client.get(self.url, format="json")
         response_employee = self.client.get(
             self.url, {"employee_id": "A123"}, format="json"
@@ -445,7 +447,7 @@ class FinancialsApiTest(APITestCase):
         self.assertEqual(response_employee.status_code, status.HTTP_200_OK)
         self.assertEqual(
             response_employee.data,
-            f"Employee Employee1 A123 pay is 192.0 as employee, 316.8 as leader, total 508.8",
+            "Employee Employee1 A123 pay is 192.0 as employee, 316.8 as leader, total 508.8",
         )
 
         self.assertEqual(response_team.status_code, status.HTTP_200_OK)

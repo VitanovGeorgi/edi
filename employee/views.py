@@ -39,6 +39,9 @@ def employee_api(request):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     if request.method == "POST":
+        """
+        Expects a json {'name': [str], 'hourly_rate': [float], 'employee_id': [str]}.
+        """
         serializer = EmployeeSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -52,6 +55,11 @@ def employee_api_pk(request, pk):
     qs = Employee.objects.all()
 
     if request.method == "PUT":
+        """
+        Needs employee_id [str] to be passed as url param. In the body it needs to receive
+        {'name': [str], 'hourly_rate': [float], 'employee_id': [str]}, with any of them can be missing
+        and it'll update them in the employee with employee_id.
+        """
         query_employee = qs.filter(employee_id=pk)
 
         if "name" in request.data:
@@ -84,6 +92,9 @@ def employee_api_pk(request, pk):
         return Response(request.data, status=status.HTTP_204_NO_CONTENT)
 
     if request.method == "DELETE":
+        """
+        Needs to be passed the employee_id [str] as url param.
+        """
         query_employee = qs.filter(employee_id=pk)
         if not query_employee.exists():
             return Response(
@@ -122,6 +133,9 @@ def team_api(request):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     if request.method == "POST":
+        """
+        Expects a json {'name': [str]}.
+        """
         serializer = TeamSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -133,7 +147,9 @@ def team_api(request):
 @api_view(["PUT", "DELETE"])
 def team_api_pk(request, pk):
     qs = Team.objects.all()
-
+    """
+        Expects a url param [str] of the team's name.
+    """
     if request.method == "PUT":
         # returns a QuerySet object of Team objects, but doesn't matter since there is uniqueness enforced
         query_team = qs.filter(name=pk)
@@ -170,6 +186,10 @@ def team_employee_api(request):
         Won't be using url params for put and delete, rather it'll use query params.
     """
     if request.method == "GET":
+        """
+        If query_param: employee_id [str] given, it'll return that employee's assignments,
+        o.w. will return all employees' assignments.
+        """
         query_id = request.query_params.get("employee_id", None)
 
         if query_id is not None:
@@ -207,6 +227,10 @@ def team_employee_api(request):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     if request.method == "POST":
+        """
+        Needs input json {'employee': 'employee_id', 'team': 'name',
+        'employee_relation': 'LEADER/EMPLOYEE', 'work_arr': hour [int]}
+        """
         input_data = request.data
 
         if "employee" not in request.data:
@@ -240,7 +264,6 @@ def team_employee_api(request):
         serializer = PartialTeamEmployeeSerializer(data=input_data)
         # to validate the remaining of the request.data fields
         serializer.is_valid(raise_exception=True)
-
         # validating that the input hours aren't going to take the employee over the maximum allowed
         employee_relations = TERelation.objects.filter(employee=employee.id)
         total_hours = 0
@@ -258,6 +281,7 @@ def team_employee_api(request):
             )
 
         serializer.save()
+
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     if request.method == "PUT":
@@ -308,15 +332,11 @@ def team_employee_api(request):
         if "employee_type" in request.data:
             if not isinstance(request.data["employee_type"], str):
                 raise serializers.ValidationError(
-                    "Please enter a valid employee type, a float",
-                    status=status.HTTP_404_NOT_FOUND,
+                    "Please enter a valid employee type, a float"
                 )
 
             if request.data["employee_type"] not in ["EMPLOYEE", "LEADER"]:
-                raise serializers.ValidationError(
-                    "please enter a valid employee type",
-                    status=status.HTTP_404_NOT_FOUND,
-                )
+                raise serializers.ValidationError("please enter a valid employee type")
 
             query_relation.update(employee_type=request.data["employee_type"])
 
@@ -326,8 +346,7 @@ def team_employee_api(request):
         if "employee_update" in request.data:
             if not isinstance(request.data["employee_update"], str):
                 raise serializers.ValidationError(
-                    "Please enter a valid employee id, a string",
-                    status=status.HTTP_404_NOT_FOUND,
+                    "Please enter a valid employee id, a string"
                 )
             # that the employee we're changing it with exists
             employee = Employee.objects.filter(
@@ -335,59 +354,50 @@ def team_employee_api(request):
             ).first()
             if employee is None:
                 raise serializers.ValidationError(
-                    "You are trying to replace the employee with non existing employee.",
-                    status=status.HTTP_404_NOT_FOUND,
+                    "You are trying to replace the employee with non existing employee."
                 )
             query_relation.update(employee=employee)
 
         if "team_update" in request.data:
             if not isinstance(request.data["team_update"], str):
                 raise serializers.ValidationError(
-                    "Please enter a valid team name, a string",
-                    status=status.HTTP_404_NOT_FOUND,
+                    "Please enter a valid team name, a string"
                 )
-            team = Team.objects.filter(team=request.data["team_update"]).first()
+            team = Team.objects.filter(name=request.data["team_update"]).first()
             if team is None:
                 raise serializers.ValidationError(
-                    "You are trying to replace team with non existing team.",
-                    status=status.HTTP_404_NOT_FOUND,
+                    "You are trying to replace team with non existing team."
                 )
             query_relation.update(team=team)
 
         return Response(request.data, status=status.HTTP_204_NO_CONTENT)
 
     if request.method == "DELETE":
+        """
+        Needs the employee_pk and team_pk as query body to identify which relation to delete.
+        """
         # identifying the query relation
         employee_pk = request.data["employee_pk"]
         team_pk = request.data["team_pk"]
         if employee_pk is None:
-            raise serializers.ValidationError(
-                "Please provide an employee_pk.", status=status.HTTP_404_NOT_FOUND
-            )
+            raise serializers.ValidationError("Please provide an employee_pk.")
         if not isinstance(employee_pk, str):
             raise serializers.ValidationError(
-                "Please provide a valid employee_pk, a string.",
-                status=status.HTTP_404_NOT_FOUND,
+                "Please provide a valid employee_pk, a string."
             )
         if team_pk is None:
-            raise serializers.ValidationError(
-                "Please provide a team_pk.", status=status.HTTP_404_NOT_FOUND
-            )
+            raise serializers.ValidationError("Please provide a team_pk.")
         if not isinstance(team_pk, str):
             raise serializers.ValidationError(
-                "Please provide a valid team_pk, a string.",
-                status=status.HTTP_404_NOT_FOUND,
+                "Please provide a valid team_pk, a string."
             )
 
         if not Employee.objects.filter(employee_id=employee_pk).exists():
             raise serializers.ValidationError(
-                f"Employee with {employee_pk} does not exist.",
-                status=status.HTTP_404_NOT_FOUND,
+                f"Employee with {employee_pk} does not exist."
             )
         if not Team.objects.filter(name=team_pk).exists():
-            raise serializers.ValidationError(
-                f"Team {team_pk} does not exist.", status=status.HTTP_404_NOT_FOUND
-            )
+            raise serializers.ValidationError(f"Team {team_pk} does not exist.")
 
         query_relation = qs.filter(
             employee=Employee.objects.get(employee_id=employee_pk),
@@ -395,9 +405,7 @@ def team_employee_api(request):
         )
 
         if query_relation.first() is None:
-            raise serializers.ValidationError(
-                "This relation does not exist.", status=status.HTTP_404_NOT_FOUND
-            )
+            raise serializers.ValidationError("This relation does not exist.")
 
         query_relation.delete()
         return Response(
@@ -431,9 +439,7 @@ def financials_api(request):
         team = Team.objects.filter(name=query_team).first()
 
         if employee is None:
-            raise serializers.ValidationError(
-                "No employee with such id.", status=status.HTTP_404_NOT_FOUND
-            )
+            raise serializers.ValidationError("No employee with such id.")
 
         if team is None:
             raise serializers.ValidationError("No team with such name.")
@@ -441,8 +447,7 @@ def financials_api(request):
         team_employee = qs.filter(employee=employee, team=team)
         if team_employee.first() is None:
             raise serializers.ValidationError(
-                "This employee is not assigned to this team.",
-                status=status.HTTP_404_NOT_FOUND,
+                "This employee is not assigned to this team."
             )
 
         serializer = PartialTeamEmployeeSerializer(instance=team_employee.first())
@@ -459,15 +464,12 @@ def financials_api(request):
         employee = Employee.objects.filter(employee_id=query_employee).first()
 
         if employee is None:
-            raise serializers.ValidationError(
-                "No employee with such id.", status=status.HTTP_404_NOT_FOUND
-            )
+            raise serializers.ValidationError("No employee with such id.")
 
         team_employees = qs.filter(employee=employee)
         if team_employees.first() is None:
             raise serializers.ValidationError(
-                "This employee is not assigned to any team.",
-                status=status.HTTP_404_NOT_FOUND,
+                "This employee is not assigned to any team."
             )
 
         serializer = PartialTeamEmployeeSerializer(instance=team_employees, many=True)
@@ -494,16 +496,11 @@ def financials_api(request):
         team = Team.objects.filter(name=query_team).first()
 
         if team is None:
-            raise serializers.ValidationError(
-                "No team with such name.", status=status.HTTP_404_NOT_FOUND
-            )
+            raise serializers.ValidationError("No team with such name.")
 
         team_employees = qs.filter(team=team)
         if team_employees.first() is None:
-            raise serializers.ValidationError(
-                "No employee is assigned to this team.",
-                status=status.HTTP_404_NOT_FOUND,
-            )
+            raise serializers.ValidationError("No employee is assigned to this team.")
 
         serializer = PartialTeamEmployeeSerializer(instance=team_employees, many=True)
 
